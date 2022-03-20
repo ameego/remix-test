@@ -121,9 +121,12 @@ input:where([type="search"]) {
 }
 
 .remix-app__header-home-link {
-  /*width: 106px;*/
-  /*height: 30px;*/
   color: var(--color-foreground);
+}
+
+.remix-app__header-home-link h1 {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .remix-app__header-nav ul {
@@ -213,4 +216,53 @@ input:where([type="search"]) {
 .remix__form > * {
   margin-top: 0;
   margin-bottom: 0;
+}
+
+
+h1 {
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, 1);
+  color: black;
+  padding: 0.5rem;
+  border-radius: 5px;
+}
+
+* + h1 {
+  margin-top: 4rem;
+}
+
+.majOnFirstLetter::first-letter {
+  text-transform: uppercase;
+}
+
+h2 {
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+dd {
+  margin-left: 0;
+}
+
+h2.noUnderline {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+dl + dl {
+  margin-top: 2.5rem;
+}
+
+h3 {
+  margin: 0.5rem 0;
+  font-weight: normal;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.inline-block {
+  display: inline-block;
+  padding-left: 0.25rem;
+  padding-right: 0.5rem;
 }

@@ -125,13 +125,6 @@ function Document({
 function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="remix-app">
-      <header className="remix-app__header">
-        <div className="container remix-app__header-content">
-          <Link to="/" title="Remix" className="remix-app__header-home-link">
-            <h1>Accounts</h1>
-          </Link>
-        </div>
-      </header>
       <div className="remix-app__main">
         <div className="container remix-app__main-content">{children}</div>
       </div>

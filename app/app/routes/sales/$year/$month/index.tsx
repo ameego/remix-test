@@ -1,8 +1,9 @@
-import { useLoaderData } from "remix";
+import {useLoaderData, useParams} from "remix";
 import moment from 'moment';
 import { useState} from "react";
 const _ = require('lodash');
-import { useEffectOnce } from 'react-use'
+import { useEffectOnce } from 'react-use';
+import dayjs from 'dayjs';
 
 
 function daysInMonth (month, year) {
@@ -29,6 +30,7 @@ function aggregate (dataSet) {
   }
 
 function formatData (dataSet) {
+    console.log(dataSet);
     const data = [];
 
     dataSet.map((item) => {
@@ -39,7 +41,7 @@ function formatData (dataSet) {
         const date = item.created_at;
         let type = tender.type || 'Unknown';
         const note = tender.note || 'Unknown';
-        const amount = tender.amount_money.amount / 100;         
+        const amount = tender.amount_money.amount / 100;
         const isOther = tender.type === "OTHER" && tender.type !== "CASH";
 
         if(type === 'THIRD_PARTY_CARD') {
@@ -56,6 +58,13 @@ function formatData (dataSet) {
             col4: amount
           })
         }        
+      } else {
+          data.push({
+              col1: moment(item.created_at).format('DD/MM/YYYY'),
+              col2: 'ACCIDENTAL_CHARGE',
+              col3: 'Accidental charge (please contact Robin)',
+              col4: item.refunds[0].amount_money.amount / 100
+          })
       }
 
       return data;
@@ -84,12 +93,13 @@ export const loader = async ({ params }) => {
       body: JSON.stringify({'location_ids': ['LP4TYRNQXH210'], 'query': {'filter': {'date_time_filter': {'closed_at': {'start_at': `${currentYear}-${currentMonth}-01T04:00:00Z`, 'end_at': `${currentYear}-${currentMonth}-${NumberOfdaysInMonth}T20:00:00Z`}},'state_filter': {'states': ['COMPLETED']}},'sort': {'sort_field': 'CLOSED_AT', 'sort_order': 'ASC'}}}) // body data type must match "Content-Type" header
   });
 
-  
+
   return response;
 };
 
 export default function Index() {
-  const posts = useLoaderData();
+    const params = useParams();
+    const posts = useLoaderData();
   const aggregatedData = formatData(posts.orders);
   const [breakdown, setBreakdown] = useState();
 
@@ -114,20 +124,20 @@ export default function Index() {
 
   return (
     <div>
-        <h2>Breakdown per payment type</h2>
+        <h1>{dayjs(`${params.year}-${params.month}`).format('MMMM YYYY')}: total per payment type</h1>
         {breakdown && Object.keys(breakdown).map((item, index) => {
-            return <p key={`breakdow-${index}`}>{item}:  ${_.sum(breakdown[item])}</p>;
+            return <h2 className="noUnderline majOnFirstLetter" key={`breakdow-${index}`}>{item}:  ${_.sum(breakdown[item]).toFixed(2)}</h2>;
         })}
-        <h2>Breakdown per day</h2>
+        <h1>{dayjs(`${params.year}-${params.month}`).format('MMMM YYYY')}: Breakdown per day</h1>
       {aggregatedData && Object.keys(aggregatedData).map(function(key, index) {    
         return <dl key={`yo-${index}`}>
           <dt key={`date-${index}`}>
-          {aggregatedData[key][0].date}
+              <h2 className="inline-block">{aggregatedData[key][0].date}</h2>
           </dt>
           {aggregatedData[key].map((element, index) => {            
             return (
             <dd key={`list${index}`}>              
-              <p><strong>{element.type}:</strong> ${element.amount}</p>              
+              <h3 className="majOnFirstLetter">{element.type}: ${element.amount}</h3>
             </dd>
           )})}      
       </dl>})}
