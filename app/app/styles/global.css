@@ -121,8 +121,8 @@ input:where([type="search"]) {
 }
 
 .remix-app__header-home-link {
-  width: 106px;
-  height: 30px;
+  /*width: 106px;*/
+  /*height: 30px;*/
   color: var(--color-foreground);
 }
 

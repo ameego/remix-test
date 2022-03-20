@@ -114,11 +114,11 @@ export default function Index() {
 
   return (
     <div>
-        <h1>Breakdown per payment type</h1>
+        <h2>Breakdown per payment type</h2>
         {breakdown && Object.keys(breakdown).map((item, index) => {
             return <p key={`breakdow-${index}`}>{item}:  ${_.sum(breakdown[item])}</p>;
         })}
-        <h1>Breakdown per day</h1>
+        <h2>Breakdown per day</h2>
       {aggregatedData && Object.keys(aggregatedData).map(function(key, index) {    
         return <dl key={`yo-${index}`}>
           <dt key={`date-${index}`}>
