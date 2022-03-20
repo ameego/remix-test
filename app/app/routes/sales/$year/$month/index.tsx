@@ -1,6 +1,9 @@
 import { useLoaderData } from "remix";
 import moment from 'moment';
+import { useState} from "react";
 const _ = require('lodash');
+import { useEffectOnce } from 'react-use'
+
 
 function daysInMonth (month, year) {
   return new Date(year, month, 0).getDate();
@@ -88,9 +91,34 @@ export const loader = async ({ params }) => {
 export default function Index() {
   const posts = useLoaderData();
   const aggregatedData = formatData(posts.orders);
+  const [breakdown, setBreakdown] = useState();
+
+    useEffectOnce(() => {
+        let results = {};
+
+        _.reduce(aggregatedData, function (ori1, data1, c) {
+            ori1[c] = _.reduce(data1, function (ori2, data2) {
+                if(!_.has(results, data2.type)) {
+                    results[data2.type] = []
+                }
+
+                results[data2.type].push(data2.amount);
+
+                return ori2;
+            }, ori1[c] || {});
+            return ori1;
+        }, {});
+
+        setBreakdown(results);
+    }, [aggregatedData, setBreakdown]);
 
   return (
     <div>
+        <h1>Breakdown per payment type</h1>
+        {breakdown && Object.keys(breakdown).map((item, index) => {
+            return <p key={`breakdow-${index}`}>{item}:  ${_.sum(breakdown[item])}</p>;
+        })}
+        <h1>Breakdown per day</h1>
       {aggregatedData && Object.keys(aggregatedData).map(function(key, index) {    
         return <dl key={`yo-${index}`}>
           <dt key={`date-${index}`}>
