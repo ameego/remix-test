@@ -4,6 +4,8 @@ import { useState} from "react";
 const _ = require('lodash');
 import { useEffectOnce } from 'react-use';
 import dayjs from 'dayjs';
+var formatThousands = require('format-thousands');
+
 
 
 function daysInMonth (month, year) {
@@ -126,7 +128,7 @@ export default function Index() {
     <div>
         <h1>{dayjs(`${params.year}-${params.month}`).format('MMMM YYYY')}: total per payment type</h1>
         {breakdown && Object.keys(breakdown).map((item, index) => {
-            return <h2 className="noUnderline majOnFirstLetter" key={`breakdow-${index}`}>{item}:  ${_.sum(breakdown[item]).toFixed(2)}</h2>;
+            return <h2 className="noUnderline majOnFirstLetter" key={`breakdow-${index}`}>{item}:  ${formatThousands(_.sum(breakdown[item]).toFixed(2), ',')}</h2>;
         })}
         <h1>{dayjs(`${params.year}-${params.month}`).format('MMMM YYYY')}: Breakdown per day</h1>
       {aggregatedData && Object.keys(aggregatedData).map(function(key, index) {    
