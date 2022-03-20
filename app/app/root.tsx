@@ -31,7 +31,9 @@ export default function App() {
   return (
     <Document>
       <Layout>
-        <Outlet />
+        <div>
+          <Outlet />
+        </div>
       </Layout>
     </Document>
   );
