@@ -34,7 +34,7 @@ function formatData (dataSet) {
       if(tenders) {
         const tender = tenders[0];
         const date = item.created_at;
-        var type = tender.type || 'Unknown'
+        let type = tender.type || 'Unknown';
         const note = tender.note || 'Unknown';
         const amount = tender.amount_money.amount / 100;         
         const isOther = tender.type === "OTHER" && tender.type !== "CASH";
