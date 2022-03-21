@@ -32,7 +32,6 @@ function aggregate (dataSet) {
   }
 
 function formatData (dataSet) {
-    console.log(dataSet);
     const data = [];
 
     dataSet.map((item) => {
