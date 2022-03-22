@@ -16,6 +16,16 @@ html {
   box-sizing: border-box;
 }
 
+body {
+  font-size: 100%;
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 80%;
+  }
+}
+
 *,
 *::before,
 *::after {
