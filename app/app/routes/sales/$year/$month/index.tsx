@@ -41,7 +41,11 @@ function formatData(dataSet) {
   const data = [];
 
   dataSet.map((item) => {
-    console.log(item);
+    const transactionId = item.id;
+    const refundedObject = _.find(dataSet, {
+      returns: [{ source_order_id: transactionId }],
+    });
+    const hasRefund = !!refundedObject;
     const tenders = item.tenders;
 
     if (tenders) {
@@ -58,7 +62,7 @@ function formatData(dataSet) {
         type = "Cash";
       }
 
-      if (type !== "NO_SALE") {
+      if (type !== "NO_SALE" && !hasRefund) {
         data.push({
           col1: moment(date).format("DD/MM/YYYY"),
           col2: type,
@@ -68,13 +72,6 @@ function formatData(dataSet) {
           col4: amount,
         });
       }
-    } else {
-      data.push({
-        col1: moment(item.created_at).format("DD/MM/YYYY"),
-        col2: "ACCIDENTAL_CHARGE",
-        col3: "Accidental charge (please contact Robin)",
-        col4: item.refunds[0].amount_money.amount / 100,
-      });
     }
 
     return data;
@@ -120,7 +117,7 @@ export const loader = async ({ params }) => {
           },
           sort: { sort_field: "CLOSED_AT", sort_order: "ASC" },
         },
-      }), // body data type must match "Content-Type" header
+      }),
     }
   );
 
