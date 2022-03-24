@@ -1,127 +1,46 @@
-import { useLoaderData, useParams } from "remix";
-import moment from "moment";
+import { Link, useLoaderData, useParams } from "remix";
 import { useState } from "react";
 const _ = require("lodash");
 import { useEffectOnce } from "react-use";
 import dayjs from "dayjs";
+import { formatData } from "~/src/helper";
+import moment from "moment";
 var formatThousands = require("format-thousands");
-
-function daysInMonth(month, year) {
-  return new Date(year, month, 0).getDate();
-}
-
-function aggregate(dataSet) {
-  var data = {};
-  var output = _(dataSet).groupBy("col1").value();
-
-  // console.log(output);
-
-  for (const property in output) {
-    var obj = _(output[property])
-      .groupBy("col3")
-      .map((objs, key) => {
-        {
-          return {
-            date: objs[0].col1,
-            type: key,
-            amount: _.sumBy(objs, "col4"),
-          };
-        }
-      })
-      .value();
-
-    data[property] = obj;
-  }
-
-  return data;
-}
-
-function formatData(dataSet) {
-  // console.log(dataSet);
-  const data = [];
-
-  dataSet.map((item) => {
-    const transactionId = item.id;
-    const refundedObject = _.find(dataSet, {
-      returns: [{ source_order_id: transactionId }],
-    });
-    const hasRefund = !!refundedObject;
-    const tenders = item.tenders;
-
-    if (tenders) {
-      const tender = tenders[0];
-      const date = item.created_at;
-      let type = tender.type || "Unknown";
-      const note = tender.note || "Unknown";
-      const amount = tender.amount_money.amount / 100;
-      const isOther = tender.type === "OTHER" && tender.type !== "CASH";
-
-      if (type === "THIRD_PARTY_CARD") {
-        type = "Card";
-      } else if (type === "CASH") {
-        type = "Cash";
-      }
-
-      if (type !== "NO_SALE" && !hasRefund) {
-        data.push({
-          col1: moment(date).format("DD/MM/YYYY"),
-          col2: type,
-          col3: isOther
-            ? note.toLowerCase().replace(/\s/g, "")
-            : type.toLowerCase().replace(/\s/g, ""),
-          col4: amount,
-        });
-      }
-    }
-
-    return data;
-  });
-
-  return aggregate(data);
-}
 
 export const loader = async ({ params }) => {
   const currentYear = params.year;
   const currentMonth = params.month;
-  var endOfMonth = parseInt(currentMonth) + 1;
-  endOfMonth.toString();
-  const NumberOfdaysInMonth = daysInMonth(
-    parseInt(currentMonth),
-    parseInt(currentYear)
-  ).toString();
+  const NumberOfdaysInMonth = dayjs(`${currentYear}-${currentMonth}-01`)
+    .daysInMonth()
+    .toString();
 
-  const response = await fetch(
-    "https://connect.squareup.com/v2/orders/search",
-    {
-      method: "POST",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization:
-          "Bearer EAAAEPMYdvO5GBA9sBlmEvAy0pcjImmzM0sG5E6aUCuYFz3DV-T5kvRhRIfQ8r8y",
-        "Access-Control-Allow-Origin": "*",
-      },
-      redirect: "follow",
-      referrerPolicy: "no-referrer",
-      body: JSON.stringify({
-        location_ids: ["LP4TYRNQXH210"],
-        query: {
-          filter: {
-            date_time_filter: {
-              closed_at: {
-                start_at: `${currentYear}-${currentMonth}-01T04:00:00Z`,
-                end_at: `${currentYear}-${currentMonth}-${NumberOfdaysInMonth}T20:00:00Z`,
-              },
+  return fetch("https://connect.squareup.com/v2/orders/search", {
+    method: "POST",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization:
+        "Bearer EAAAEPMYdvO5GBA9sBlmEvAy0pcjImmzM0sG5E6aUCuYFz3DV-T5kvRhRIfQ8r8y",
+      "Access-Control-Allow-Origin": "*",
+    },
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
+    body: JSON.stringify({
+      location_ids: ["LP4TYRNQXH210"],
+      query: {
+        filter: {
+          date_time_filter: {
+            closed_at: {
+              start_at: `${currentYear}-${currentMonth}-01T04:00:00Z`,
+              end_at: `${currentYear}-${currentMonth}-${NumberOfdaysInMonth}T20:00:00Z`,
             },
-            state_filter: { states: ["COMPLETED"] },
           },
-          sort: { sort_field: "CLOSED_AT", sort_order: "ASC" },
+          state_filter: { states: ["COMPLETED"] },
         },
-      }),
-    }
-  );
-
-  return response;
+        sort: { sort_field: "CLOSED_AT", sort_order: "ASC" },
+      },
+    }),
+  });
 };
 
 export default function Index() {
@@ -144,8 +63,6 @@ export default function Index() {
             }
 
             results[data2.type].push(data2.amount);
-
-            return ori2;
           },
           ori1[c] || {}
         );
@@ -157,12 +74,42 @@ export default function Index() {
     setBreakdown(results);
   }, [aggregatedData, setBreakdown]);
 
+  const nextDate = moment(`${params.year}-${params.month}-01`)
+    .add(1, "months")
+    .endOf("month")
+    .format("YYYY-MM-DD");
+
+  const previousDate = moment(`${params.year}-${params.month}-01`)
+    .subtract(1, "months")
+    .endOf("month")
+    .format("YYYY-MM-DD");
+
+  const splitPreviousDate = previousDate.split("-");
+  const splitNextDate = nextDate.split("-");
+
+  const currentDate = dayjs().$d;
+  const formattedCurrentDate = dayjs(currentDate).format("YYYY-MM");
+  const splitFormattedCurrentDate = formattedCurrentDate.split("-");
+  const isCurrent =
+    splitFormattedCurrentDate[0] === params.year &&
+    splitFormattedCurrentDate[1] === params.month;
+
   return (
     <div>
-      <h1>
-        {dayjs(`${params.year}-${params.month}`).format("MMMM YYYY")}: total per
-        payment type
-      </h1>
+      <div className="navigationTitle">
+        <Link to={`/sales/${splitPreviousDate[0]}/${splitPreviousDate[1]}`}>
+          Previous
+        </Link>
+        <h1>
+          {dayjs(`${params.year}-${params.month}`).format("MMMM YYYY")}: total
+          per payment type
+        </h1>
+        {!isCurrent && (
+          <Link to={`/sales/${splitNextDate[0]}/${splitNextDate[1]}`}>
+            Next
+          </Link>
+        )}
+      </div>
       {breakdown &&
         Object.keys(breakdown).map((item, index) => {
           return (

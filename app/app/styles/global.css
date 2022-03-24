@@ -276,3 +276,13 @@ h3 {
   padding-left: 0.25rem;
   padding-right: 0.5rem;
 }
+
+.navigationTitle {
+  display: flex;
+  align-items: center;
+}
+
+.navigationTitle h1 {
+  flex: 1;
+  margin: 0;
+}
