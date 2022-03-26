@@ -67,3 +67,28 @@ export function formatData(dataSet) {
 
   return aggregate(data);
 }
+
+export function getPaymentBreakdown(aggregatedData) {
+  let results = {};
+
+  _.reduce(
+    aggregatedData,
+    (ori1, data1, c) => {
+      ori1[c] = _.reduce(
+        data1,
+        function (ori2, data2) {
+          if (!_.has(results, data2.type)) {
+            results[data2.type] = [];
+          }
+
+          results[data2.type].push(data2.amount);
+        },
+        ori1[c] || {}
+      );
+      return ori1;
+    },
+    {}
+  );
+
+  return results;
+}

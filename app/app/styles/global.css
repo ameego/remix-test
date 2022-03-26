@@ -278,11 +278,46 @@ h3 {
 }
 
 .navigationTitle {
+  position: sticky;
+  top: 1rem;
   display: flex;
   align-items: center;
 }
 
 .navigationTitle h1 {
   flex: 1;
-  margin: 0;
+  margin: 0 1rem;
+}
+
+.month-selector {
+  display: block;
+  line-height: 1;
+}
+
+.month-selector:hover svg {
+  opacity: 0.75;
+}
+
+.month-selector svg {
+  width: 3rem;
+  height: 3rem;
+  fill: white;
+}
+
+.link-disabled {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+body {
+  padding: 2rem 1rem;
+}
+
+.payment-method {
+  vertical-align: middle;
+  fill: white;
+  width: 2rem;
+  height: 2rem;
+  margin-left: 0.5rem;
+  margin-right: 1rem;
 }
